@@ -32,6 +32,7 @@ function preload() {
 
 var platforms;
 var player;
+var cursors;
 
 // crear los elementos del juego
 function create() {
@@ -56,20 +57,45 @@ function create() {
         frameRate: 10,
         repeat: -1
     });
-    
+
     this.anims.create({
         key: 'turn',
-        frames: [ { key: 'dude', frame: 4 } ],
+        frames: [{ key: 'dude', frame: 4 }],
         frameRate: 20
     });
-    
+
     this.anims.create({
         key: 'right',
         frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
         frameRate: 10,
         repeat: -1
     });
+
+    // colisiones entre el personaje, y el suelo
+    this.physics.add.collider(player, platforms);
+
+    // 
+    cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
+    if (cursors.left.isDown) {
+        player.setVelocityX(-160);
+
+        player.anims.play('left', true);
+    }
+    else if (cursors.right.isDown) {
+        player.setVelocityX(160);
+
+        player.anims.play('right', true);
+    }
+    else {
+        player.setVelocityX(0);
+
+        player.anims.play('turn');
+    }
+
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.setVelocityY(-330);
+    }
 }
