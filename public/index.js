@@ -17,6 +17,12 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+var platforms;
+var player;
+var cursors;
+var score = 0;
+var scoreText;
+var boms;
 
 // cargar imagenes, spresheets etc...
 function preload() {
@@ -30,13 +36,10 @@ function preload() {
     );
 }
 
-var platforms;
-var player;
-var cursors;
-
 // crear los elementos del juego
 function create() {
     this.add.image(400, 300, 'sky');
+    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
     platforms = this.physics.add.staticGroup();
 
@@ -74,8 +77,62 @@ function create() {
     // colisiones entre el personaje, y el suelo
     this.physics.add.collider(player, platforms);
 
-    // 
+    // observando cuando las telcas son presionadas
     cursors = this.input.keyboard.createCursorKeys();
+
+    stars = this.physics.add.group({
+        key: 'star',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    stars.children.iterate(function (child) {
+
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+    });
+
+    this.physics.add.collider(stars, platforms);
+
+    this.physics.add.overlap(player, stars, collectStar, null, this);
+
+    bombs = this.physics.add.group();
+
+    this.physics.add.collider(bombs, platforms);
+
+    this.physics.add.collider(player, bombs, hitBomb, null, this);
+}
+
+function collectStar(player, star) {
+    star.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (stars.countActive(true) === 0) {
+        stars.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+
+    }
+}
+
+function hitBomb(player, bomb) {
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+
+    player.anims.play('turn');
+
+    gameOver = true;
 }
 
 function update() {
