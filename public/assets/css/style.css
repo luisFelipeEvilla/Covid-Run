@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-areas: 
+    'header',
+    'main',
+    'footer';
+}
+
+.header {
+    grid-area: header;
+    text-align: center;
+}
+
+.main {
+    grid-area: main;
+}
+
+.footer {
+    grid-area: footer;
+}
