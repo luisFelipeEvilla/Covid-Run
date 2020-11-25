@@ -1,5 +1,5 @@
-import boot from './escenas/BootScene.js';
-
+import gameScene from './escenas/GameScene.js';
+import menuScene from './escenas/MenuScene.js';
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -8,13 +8,13 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { y: 400 },
             debug: false
         }
     },
-    scene: [boot]
+    scene: [menuScene, gameScene]
 };
 
 var game = new Phaser.Game(config);
-
+game.scene.start('menu');
 
