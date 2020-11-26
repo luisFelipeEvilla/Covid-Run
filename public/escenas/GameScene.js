@@ -37,10 +37,13 @@ export default class GameScene extends Phaser.Scene {
       "assets/personajes/principal/Principal2.png",
       { frameWidth: 64, frameHeight: 64 }
     );
+    //this.load.audio('sonidoJuego', "assets/sonidos/sonidoJuego.mp3");
   }
 
   // crear los elementos del juego
   create() {
+    // añadir musica
+    //this.sonido = this.sound.add('sonidoJuego', { loop: true});
     // añadir el fondo
     this.fondo = this.add.tileSprite(0, 0, 850, 400, "fondo");
     this.fondo.setOrigin(0, 0);
@@ -96,13 +99,15 @@ export default class GameScene extends Phaser.Scene {
       },
     });
 
-    // this.obstaculos.setVelocityX(-180);
+    this.obstaculos.setVelocityX(-120);
 
     this.physics.add.overlap(
-      this.obstaculos,
       this.players,
-      () => {
-        this.socket.emit("contagio");
+      this.obstaculos,
+      (jugador, estrella) => {
+        if (jugador.id == this.socket.id) {
+            this.socket.emit("contagio");
+        }
       },
       null,
       this
@@ -114,7 +119,6 @@ export default class GameScene extends Phaser.Scene {
   // crear los personajes a medida que se van conectando
   crearPersonaje(data) {
     var jugadores = data;
-    console.log(data);
     var cont = 1;
 
     jugadores.forEach((jugador) => {
@@ -128,12 +132,10 @@ export default class GameScene extends Phaser.Scene {
         
         this.players.add(nuevoJugador);
         nuevoJugador.setCollideWorldBounds(true);
-        nuevoJugador.prsonaje = jugador.personaje;
         nuevoJugador.vivo = true;
         cont ++;
     } else {
         if (!this.personajeCreado) {
-            console.log("creando principal");
           this.player = this.physics.add
             .sprite(100, 270, `personaje${cont}`)
             .setScale(1.5, 1.5)
@@ -165,6 +167,15 @@ export default class GameScene extends Phaser.Scene {
     //player.setVelocityY(-300);
     player.setVelocityX(0);
     player.vivo = false;
+    
+    
+    this.time.addEvent({
+        delay: 1500,
+        callback: () => {
+            player.setVisible(false);
+        },
+        loop: false,
+      });
 
     var aux = true;
 
@@ -258,7 +269,7 @@ export default class GameScene extends Phaser.Scene {
     this.socket.on("izquierda", (id) => {
         var cont = 1;
         this.players.children.iterate(jugador => {
-            if (jugador.id == id) {
+            if (jugador.id === id) {
                 jugador.setVelocityX(-160);
                 jugador.anims.play(`left${cont}`)
             }
@@ -270,7 +281,7 @@ export default class GameScene extends Phaser.Scene {
         var cont = 1;
 
         this.players.children.iterate((j) => {
-          if (j.id == id) {
+          if (j.id === id) {
             j.setVelocityX(160);
             j.anims.play(`right${cont}`);
            } else {
@@ -284,7 +295,7 @@ export default class GameScene extends Phaser.Scene {
         var cont = 1;
        
         this.players.children.iterate((j) => {
-          if (j.id == id) {
+          if (j.id === id) {
             j.setVelocityX(0);
             j.anims.play(`turn${cont}`);
           } else {
@@ -296,7 +307,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.socket.on("arriba", (id) => {
         this.players.children.iterate((j) => {
-          if (j.id == id && j.body.touching.down) {
+          if (j.id === id && j.body.touching.down) {
             j.setVelocityY(-250);
           } 
         });
