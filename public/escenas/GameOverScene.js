@@ -1,7 +1,11 @@
-
-export default class MenuScene extends Phaser.Scene {
+export default class GameOverScene extends Phaser.Scene {
     constructor() {
-        super({ key: 'menu' });
+        super({ key: 'gameOver'})
+
+    }
+
+    init(score) {
+        this.score = score;
     }
 
     preload() {
@@ -12,16 +16,16 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     create() {
-        var centroX = this.game.config.width / 2;
+        var centroX = this.game.config.width / 2 ;
         var centroY = this.game.config.height / 2;
 
         // añadiendo boton de inicio
         this.boton = this.add.image(centroX,
-            centroY, 'iniciar');
+            centroY + 40, 'iniciar');
 
         this.boton.setInteractive().on('pointerdown', () => {
+            this.scene.stop();
             this.game.scene.start('game');
-            this.game.scene.pause('menu')
         });
 
         this.boton.on('pointerover', () => {
@@ -42,7 +46,14 @@ export default class MenuScene extends Phaser.Scene {
 
         //añadiendo call action
         this.txtIniciar = this.add.text(centroX,
-            centroY - 85, "Iniciar Juego",
+            centroY - 85, "Juego Terminado",
+            { font: "bold 24px sans-serif", fill: "balck", align: "center"});
+        this.txtIniciar.setOrigin(0.5, 0.5);
+
+        //añadiendo puntuacion
+
+        this.txtIniciar = this.add.text(centroX,
+            centroY - 45, 'Score: ' + this.score,
             { font: "bold 24px sans-serif", fill: "balck", align: "center"});
         this.txtIniciar.setOrigin(0.5, 0.5);
     }

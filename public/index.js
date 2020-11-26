@@ -1,5 +1,7 @@
 import gameScene from './escenas/GameScene.js';
 import menuScene from './escenas/MenuScene.js';
+import gameOverScene from './escenas/GameOverScene.js';
+
 var config = {
     type: Phaser.AUTO,
     width: 800,
@@ -12,7 +14,7 @@ var config = {
             debug: false
         }
     },
-    scene: [menuScene, gameScene]
+    scene: [menuScene, gameScene, gameOverScene]
 };
 
 var game = new Phaser.Game(config);

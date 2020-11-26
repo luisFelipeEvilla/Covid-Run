@@ -1,15 +1,19 @@
 // carga los elementos iniciales del juego
-export default class Boot extends Phaser.Scene {
+export default class GameScene extends Phaser.Scene {
 
     // key, es el nombre mediante el cual se hara referencia a la escena
     constructor() {
         super({ key: 'game' });
+      
+    }
+
+    init() {
+        this.score = 0;
         this.platforms = null;
         this.player = null;
         this.cursors = null;
         this.score = 0;
         this.scoreText = "";
-        this.bombs = null;
         this.obstaculos = null;
         this.gameOver = false;
 
@@ -19,7 +23,7 @@ export default class Boot extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fondo', 'assets/fondos/fondo1.png');
+        this.load.image('fondo', 'assets/fondos/Fondo1.png');
         this.load.image('suelo', 'assets/fondos/Borde.png');
         this.load.image('obstaculo', 'assets/star.png');
         this.load.spritesheet('personaje',
@@ -80,15 +84,24 @@ export default class Boot extends Phaser.Scene {
 
         this.physics.add.overlap(this.obstaculos, this.player, this.contagio, null, this);
         this.physics.add.collider(this.platforms, this.obstaculos);
-        // atrapar estrellas
-        // this.physics.add.overlap(this.player, this.obstaculos, this.collectStar, null, this);
     }
 
     contagio(player, obstaculo) {
+        this.gameOver = true;
         this.player.setTint(0xff0000);
         this.player.anims.play('turn');
         this.player.setVelocityY(-300);
-        this.player.body.enable = false;
+        this.obstaculos.setVelocityX(0);
+        
+        this.time.addEvent({
+            delay: 1500,
+            callback: () => {
+                this.scene.stop();
+                this.game.scene.start('gameOver',  this.score);
+            },
+            loop: false
+        });
+        
     }
 
     crearObstaculo(posicionX) {
@@ -128,6 +141,7 @@ export default class Boot extends Phaser.Scene {
         this.acumulador += dt;
         this.fps++;
 
+        // cada vez que pase 1 segundo
         if (this.acumulador > 1000) {
             this.score += 1;
             this.scoreText.setText('Score: ' + this.score);
@@ -137,9 +151,7 @@ export default class Boot extends Phaser.Scene {
 
         }
 
-        // reciclar obstaculos
-        var distanciaMinima = this.game.config.width;
-
+        // crear obstaculos
         this.obstaculos.children.iterate((obstaculo) => {
             if (obstaculo.body.x < 0 - obstaculo.body.width) {
                 obstaculo.destroy();
@@ -148,26 +160,28 @@ export default class Boot extends Phaser.Scene {
             }
         })
 
-        // crear obstaculos
-
-        if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-160);
-
-            this.player.anims.play('left', true);
+        
+        if (!this.gameOver) {
+            if (this.cursors.left.isDown) {
+                this.player.setVelocityX(-160);
+    
+                this.player.anims.play('left', true);
+            }
+            else if (this.cursors.right.isDown) {
+                this.player.setVelocityX(160);
+    
+                this.player.anims.play('right', true);
+            }
+            else {
+                this.player.setVelocityX(0);
+    
+                this.player.anims.play('turn');
+            }
+    
+            if (this.cursors.up.isDown && this.player.body.touching.down) {
+                this.player.setVelocityY(-250);
+            }
         }
-        else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(160);
-
-            this.player.anims.play('right', true);
-        }
-        else {
-            this.player.setVelocityX(0);
-
-            this.player.anims.play('turn');
-        }
-
-        if (this.cursors.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-250);
-        }
+        
     }
 }
