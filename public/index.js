@@ -18,5 +18,6 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
-game.scene.start('menu');
+var socket = io();
+game.scene.start('menu', socket);
 

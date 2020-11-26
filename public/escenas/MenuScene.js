@@ -4,6 +4,10 @@ export default class MenuScene extends Phaser.Scene {
         super({ key: 'menu' });
     }
 
+    init(socket) {
+        this.socket = socket;
+    }
+
     preload() {
         this.background = this.cameras.add(0, 0, 850, 450);
         this.background.setBackgroundColor('#FFF');
@@ -20,7 +24,7 @@ export default class MenuScene extends Phaser.Scene {
             centroY, 'iniciar');
 
         this.boton.setInteractive().on('pointerdown', () => {
-            this.game.scene.start('game');
+            this.game.scene.start('game', this.socket);
             this.game.scene.pause('menu')
         });
 
