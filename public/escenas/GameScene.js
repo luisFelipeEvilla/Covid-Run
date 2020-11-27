@@ -125,7 +125,7 @@ export default class GameScene extends Phaser.Scene {
   // crear los personajes a medida que se van conectando
   crearPersonaje(data) {
     var jugadores = data.jugadores;
-
+    var cont = 1;
     jugadores.forEach((jugador) => {
       var found = false;
 
