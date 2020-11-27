@@ -4,8 +4,9 @@ export default class GameOverScene extends Phaser.Scene {
 
     }
 
-    init(score) {
-        this.score = score;
+    init(data) {
+        this.score = data.score;
+        this.socket = data.socket;
     }
 
     preload() {
@@ -25,7 +26,7 @@ export default class GameOverScene extends Phaser.Scene {
 
         this.boton.setInteractive().on('pointerdown', () => {
             this.scene.stop();
-            this.game.scene.start('game');
+            this.game.scene.start('menu');
         });
 
         this.boton.on('pointerover', () => {

@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const socket = require("socket.io");
 const chalk = require("chalk");
-const logger = require("morgan");
+//const logger = require("morgan");
 const path = require("path");
 const { log } = require("console");
 
@@ -24,17 +24,37 @@ const io = socket(servidor);
 
 const jugadores = [];
 
-
-
 io.on("connection", (socket) => {
   socket.on("nuevoJugador", id => {
-    jugadores.push(id);
-    console.log(
-      `Se ha conectado un nuevo usuario con ID: ${chalk.green(socket.id)}`
-    );
-    console.log(`número de jugadores actual: ${jugadores.length}`);
+    let found = false;
+
+    jugadores.forEach(jugador => {
+      if (jugador.id == id) {
+        found = true;
+      }
+    });
+
+    if (!found) {
+      jugadores.push({id, listo: false});
+      console.log(
+        `Se ha conectado un nuevo usuario con ID: ${chalk.green(socket.id)}`
+      );
+      console.log(`número de jugadores actual: ${jugadores.length}`);
+     
+    }
     io.emit("actualizarJugadores", {jugadores, id: socket.id});
   });
+
+  socket.on('start', () => {
+    
+    jugadores.forEach(jugador => {
+      if (jugador.id == socket.id) {
+        jugador.listo = true;
+      }
+    })
+
+    io.emit('preparados', jugadores)
+  })
 
   socket.on("crearJugadores", () => {
       io.emit("actualizarJugadores", {jugadores, id: socket.id});
@@ -61,7 +81,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    jugadores.pop(socket);
+    jugadores.pop(socket.id);
     console.log(
       `Se ha desconectado un usuario con ID: ${chalk.red(socket.id)}`
     );
