@@ -353,7 +353,7 @@ export default class GameScene extends Phaser.Scene {
       this.acumulador -= 1000;
     }
 
-    if (this.acumulador > 150) {
+    if (this.acumulador > 60) {
       if (!this.gameOver) {
         if (this.cursors.left.isDown) {
           this.socket.emit("izquierda", this.socket.id);
