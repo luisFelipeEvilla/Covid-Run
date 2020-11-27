@@ -29,6 +29,7 @@ export default class MenuScene extends Phaser.Scene {
             centroY + 40, 'iniciar');
 
         this.boton.setInteractive().on('pointerdown', () => {
+            this.boton.setTint(0xff0000);
             this.socket.emit('start');
         });
 

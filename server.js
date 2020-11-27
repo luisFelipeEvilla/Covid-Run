@@ -49,7 +49,6 @@ io.on("connection", (socket) => {
     
     jugadores.forEach(jugador => {
       if (jugador.id == socket.id) {
-        console.log(socket.id);
         jugador.listo = true;
       }
     })
@@ -68,6 +67,7 @@ io.on("connection", (socket) => {
   socket.on("gameOver", (score) => {
     jugadores.forEach(jugador=> {
       if (jugador.id == socket.id) {
+        jugador.listo = false;
         jugador.score = score;
       }
     });
