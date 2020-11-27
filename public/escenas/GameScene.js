@@ -137,7 +137,7 @@ export default class GameScene extends Phaser.Scene {
         }
       });
 
-      if (!found) {
+      if (!found && cont <= 2) {
         var nuevoJugador = this.physics.add
           .sprite(100, 270, `personaje${cont}`)
           .setScale(1.5, 1.5);

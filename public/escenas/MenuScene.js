@@ -36,12 +36,12 @@ export default class MenuScene extends Phaser.Scene {
         this.socket.on('preparados', (data) => {
             var listos = true;
             var jugadores = data;
-
+            var cont = 0;
             jugadores.forEach(jugador => {
-                if (jugador.listo == false) {
+                if (jugador.listo == false && cont < 2) {
                     listos = false;
-                    console.log(jugadores);
                 }
+                cont++;
             });
 
             if (listos) {
