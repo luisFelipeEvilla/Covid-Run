@@ -101,6 +101,10 @@ export default class GameScene extends Phaser.Scene {
       },
     });
 
+    this.obstaculos.children.iterate(obstaculo => {
+      obstaculo.anims.play('covid');
+    })
+
     this.obstaculos.setVelocityX(this.velocidadObstaculos);
 
     this.physics.add.overlap(
@@ -203,8 +207,11 @@ export default class GameScene extends Phaser.Scene {
   crearObstaculo(posicionX) {
     var obstaculo;
 
-    obstaculo = this.physics.add.image(posicionX, 370, "obstaculo");
+    obstaculo = this.physics.add.sprite(posicionX, 370, "obstaculo");
     this.obstaculos.add(obstaculo);
+    if (obstaculo != null) {
+      obstaculo.anims.play('covid');
+    }
     this.obstaculos.setVelocityX(this.velocidadObstaculos);
   }
 
@@ -261,6 +268,16 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
+
+    this.anims.create({
+      key: "covid",
+      frames: this.anims.generateFrameNumbers("obstaculo", {
+        start: 0,
+        end: 9
+      }),
+      frameRate: 15,
+      repeat: -1
+    })
   }
 
   // recibe los eventos de movimiento de los personajes
@@ -370,6 +387,7 @@ export default class GameScene extends Phaser.Scene {
     // crear obstaculos
     this.obstaculos.children.iterate((obstaculo) => {
       if (obstaculo.body.x < 0 - obstaculo.body.width) {
+        obstaculo.anims.remove('covid');
         obstaculo.destroy();
         this.crearObstaculo(850);
       }
