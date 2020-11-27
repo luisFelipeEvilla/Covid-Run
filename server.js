@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
     });
 
     if (!found) {
-      jugadores.push({id, listo: false});
+      jugadores.push({id: socket.id, listo: false});
       console.log(
         `Se ha conectado un nuevo usuario con ID: ${chalk.green(socket.id)}`
       );
