@@ -91,6 +91,18 @@ io.on("connection", (socket) => {
     io.emit("quieto", socket.id);
   });
 
+  socket.on("compensacion", (posicion) => {
+    /*
+    jugadores.forEach(jugador => {
+      if (jugador.id == socket.id) {
+        jugador.x = posicion.x;
+        jugador.y = posicion.y;
+      }
+    });
+    */
+    io.emit("compensacion", {id: socket.id, posicion});
+  })
+
   socket.on("disconnect", () => {
     jugadores.pop(socket.id);
     console.log(

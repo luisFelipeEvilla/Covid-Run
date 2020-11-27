@@ -21,6 +21,7 @@ export default class GameScene extends Phaser.Scene {
     this.acumulador = 0;
     this.socket = socket;
     this.velocidadObstaculos = -100;
+    this.contadorDelay = 0;
   }
 
   preload() {
@@ -334,11 +335,26 @@ export default class GameScene extends Phaser.Scene {
         });
       }
     });
+
+    this.socket.on("compensacion", data => {
+      var id = data.id;
+      var posicion = data.posicion;
+
+      if (id != this.socket.id) {
+        this.players.children.iterate( j => {
+          if (j.id == id) {
+            j.body.x = posicion.x;
+            j.body.y = posicion.y;
+          }
+        })
+      }
+    })
   }
 
   update(time, dt) {
     this.fondo.tilePositionX += 3;
     this.acumulador += dt;
+    this.contadorDelay += dt;
     this.fps++;
 
     // cada vez que pase 1 segundo
@@ -382,6 +398,14 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     }
+
+    if ( this.contadorDelay > 2000) {
+      this.contadorDelay = 0;
+      this.socket.emit('compensacion', {
+        x: this.player.x,
+        y: this.player.y
+      })
+    } 
 
     // crear obstaculos
     this.obstaculos.children.iterate((obstaculo) => {
