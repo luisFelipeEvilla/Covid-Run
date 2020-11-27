@@ -26,7 +26,9 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image("fondo", "assets/fondos/Fondo1.png");
     this.load.image("suelo", "assets/fondos/Borde.png");
-    this.load.image("obstaculo", "assets/star.png");
+    this.load.spritesheet("obstaculo",
+     "assets/virus.png",
+     {frameWidth: 44, frameHeight: 30});
     this.load.spritesheet(
       "personaje1",
       "assets/personajes/principal/principal.png",
@@ -37,21 +39,22 @@ export default class GameScene extends Phaser.Scene {
       "assets/personajes/principal/Principal2.png",
       { frameWidth: 64, frameHeight: 64 }
     );
-    //this.load.audio('sonidoJuego', "assets/sonidos/sonidoJuego.mp3");
+    this.load.audio('sonidoJuego', "assets/sonidos/sonidoJuego.mp3");
   }
 
   // crear los elementos del juego
   create() {
     // añadir musica
-    //this.sonido = this.sound.add('sonidoJuego', { loop: true});
-    // añadir el fondo
-    this.fondo = this.add.tileSprite(0, 0, 850, 400, "fondo");
-    this.fondo.setOrigin(0, 0);
-
+    this.sonido = this.sound.add('sonidoJuego', { loop: true});
+   // this.sonido.play();
+  
     // añadir suelo
     this.platforms = this.physics.add.staticGroup();
+    this.platforms.create(300, 427.5, "suelo").setScale(1.3, 1).refreshBody();
 
-    this.platforms.create(300, 423, "suelo").setScale(1.3, 1).refreshBody();
+    // añadir el fondo
+    this.fondo = this.add.tileSprite(0, 0, 850, 423, "fondo");
+    this.fondo.setOrigin(0, 0);
 
     //añadir personaje
     this.players = this.physics.add.group();
@@ -107,7 +110,6 @@ export default class GameScene extends Phaser.Scene {
       this.obstaculos,
       (jugador, obstaculo) => {
         if (jugador.id == this.socket.id && jugador.vivo) {
-            console.log("contagio");
           this.socket.emit("contagio");
         }
       },
@@ -127,7 +129,7 @@ export default class GameScene extends Phaser.Scene {
       var found = false;
 
       this.players.children.iterate((j) => {
-        if (j.id == jugador) {
+        if (j.id == jugador.id) {
           found = true;
         }
       });
@@ -136,11 +138,10 @@ export default class GameScene extends Phaser.Scene {
         var nuevoJugador = this.physics.add
           .sprite(100, 270, `personaje${cont}`)
           .setScale(1.5, 1.5)
-          .refreshBody();
         nuevoJugador.setBounce("0.2");
 
         this.players.add(nuevoJugador);
-        nuevoJugador.id = jugador;
+        nuevoJugador.id = jugador.id;
         nuevoJugador.setCollideWorldBounds(true);
         nuevoJugador.vivo = true;
 
@@ -189,7 +190,10 @@ export default class GameScene extends Phaser.Scene {
         delay: 1500,
         callback: () => {
           this.scene.stop();
-          this.game.scene.start("gameOver", this.score);
+          this.scene.start("gameOver", {
+            score: this.score,
+            socket: this.socket
+          });
         },
         loop: false,
       });
@@ -201,7 +205,6 @@ export default class GameScene extends Phaser.Scene {
     var obstaculo;
 
     obstaculo = this.physics.add.image(posicionX, 370, "obstaculo");
-
     this.obstaculos.add(obstaculo);
     this.obstaculos.setVelocityX(-180);
   }
@@ -336,7 +339,6 @@ export default class GameScene extends Phaser.Scene {
     this.obstaculos.children.iterate((obstaculo) => {
       if (obstaculo.body.x < 0 - obstaculo.body.width) {
         obstaculo.destroy();
-        console.log("creando obstaculo");
         this.crearObstaculo(850);
       }
     });

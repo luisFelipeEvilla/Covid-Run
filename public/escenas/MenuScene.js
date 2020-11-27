@@ -13,20 +13,41 @@ export default class MenuScene extends Phaser.Scene {
         this.background.setBackgroundColor('#FFF');
 
         this.load.image('iniciar', './assets/botones/iniciar.png');
+        //this.load.audio('musica', './assets/sonidos/sonidoMenu.mp3');
     }
 
     create() {
         var centroX = this.game.config.width / 2;
         var centroY = this.game.config.height / 2;
 
+        //añadiendo musica de fondo
+        //this.musica = this.sound.add('musica', {loop: true});
+        //this.musica.play();
+
         // añadiendo boton de inicio
         this.boton = this.add.image(centroX,
             centroY + 40, 'iniciar');
 
         this.boton.setInteractive().on('pointerdown', () => {
-            this.game.scene.start('game', this.socket);
-            this.game.scene.stop('menu');
+            this.socket.emit('start');
         });
+
+        this.socket.on('preparados', (data) => {
+            var listos = true;
+            var jugadores = data;
+
+            jugadores.forEach(jugador => {
+                if (jugador.listo == false) {
+                    listos = false;
+                    console.log("uno no esta preparado");
+                }
+            });
+
+            if (listos) {
+                this.scene.stop();
+                this.game.scene.start('game', this.socket);
+            }
+        })
 
         this.boton.on('pointerover', () => {
             this.boton.setScale(1.1, 1.1);
@@ -66,6 +87,6 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     update() {
-
+        
     }
 }
