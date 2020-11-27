@@ -4,7 +4,6 @@ const socket = require("socket.io");
 const chalk = require("chalk");
 //const logger = require("morgan");
 const path = require("path");
-const { log } = require("console");
 
 // establece las variables de entorno, a partir del archivo .env
 require("dotenv").config();
@@ -24,12 +23,13 @@ const io = socket(servidor);
 
 const jugadores = [];
 
+// conexion de un cliente
 io.on("connection", (socket) => {
   socket.on("nuevoJugador", id => {
     let found = false;
 
     jugadores.forEach(jugador => {
-      if (jugador.id == id) {
+      if (jugador.id == socket.id) {
         found = true;
       }
     });
@@ -63,6 +63,16 @@ io.on("connection", (socket) => {
   socket.on("contagio", () => {
     io.emit("contagio", socket.id);
   });
+
+  socket.on("gameOver", (score) => {
+    jugadores.forEach(jugador=> {
+      if (jugador.id == socket.id) {
+        jugador.score = score;
+      }
+    });
+
+    io.emit("listaPuntajes", jugadores );
+  })
 
   socket.on("izquierda", () => {
     io.emit("izquierda", socket.id);

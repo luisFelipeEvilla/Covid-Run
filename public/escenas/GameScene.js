@@ -20,15 +20,16 @@ export default class GameScene extends Phaser.Scene {
     this.fps = 0;
     this.acumulador = 0;
     this.socket = socket;
-    this.id;
+    this.velocidadObstaculos = -100;
   }
 
   preload() {
     this.load.image("fondo", "assets/fondos/Fondo1.png");
     this.load.image("suelo", "assets/fondos/Borde.png");
-    this.load.spritesheet("obstaculo",
-     "assets/virus.png",
-     {frameWidth: 44, frameHeight: 30});
+    this.load.spritesheet("obstaculo", "assets/virus.png", {
+      frameWidth: 44,
+      frameHeight: 30,
+    });
     this.load.spritesheet(
       "personaje1",
       "assets/personajes/principal/principal.png",
@@ -44,10 +45,10 @@ export default class GameScene extends Phaser.Scene {
   // crear los elementos del juego
   create() {
     // añadir musica
-  
+
     // añadir suelo
     this.platforms = this.physics.add.staticGroup();
-    this.platforms.create(300, 427.5, "suelo").setScale(1.3, 1).refreshBody();
+    this.platforms.create(300, 425.5, "suelo").setScale(1.3, 1).refreshBody();
 
     // añadir el fondo
     this.fondo = this.add.tileSprite(0, 0, 850, 423, "fondo");
@@ -100,7 +101,7 @@ export default class GameScene extends Phaser.Scene {
       },
     });
 
-    this.obstaculos.setVelocityX(-120);
+    this.obstaculos.setVelocityX(this.velocidadObstaculos);
 
     this.physics.add.overlap(
       this.players,
@@ -134,7 +135,7 @@ export default class GameScene extends Phaser.Scene {
       if (!found) {
         var nuevoJugador = this.physics.add
           .sprite(100, 270, `personaje${cont}`)
-          .setScale(1.5, 1.5)
+          .setScale(1.5, 1.5);
         nuevoJugador.setBounce("0.2");
 
         this.players.add(nuevoJugador);
@@ -189,7 +190,7 @@ export default class GameScene extends Phaser.Scene {
           this.scene.stop();
           this.scene.start("gameOver", {
             score: this.score,
-            socket: this.socket
+            socket: this.socket,
           });
         },
         loop: false,
@@ -203,7 +204,7 @@ export default class GameScene extends Phaser.Scene {
 
     obstaculo = this.physics.add.image(posicionX, 370, "obstaculo");
     this.obstaculos.add(obstaculo);
-    this.obstaculos.setVelocityX(-180);
+    this.obstaculos.setVelocityX(this.velocidadObstaculos);
   }
 
   //animacines de movimiento del personaje
@@ -325,10 +326,13 @@ export default class GameScene extends Phaser.Scene {
 
     // cada vez que pase 1 segundo
     if (this.acumulador > 1000) {
-      this.score += 1;
-      this.scoreText.setText("Score: " + this.score);
-      this.fpsText.setText("fps: " + this.fps);
-      this.fps = 0;
+      if (!this.gameOver) {
+        this.score += 1;
+        this.scoreText.setText("Score: " + this.score);
+        this.fpsText.setText("fps: " + this.fps);
+        this.fps = 0;
+        this.velocidadObstaculos -= 3;
+      }
       this.acumulador -= 1000;
     }
 
