@@ -146,9 +146,8 @@ export default class GameScene extends Phaser.Scene {
         nuevoJugador.id = jugador.id;
         nuevoJugador.setCollideWorldBounds(true);
         nuevoJugador.vivo = true;
+        nuevoJugador.setSize(30, 60);
 
-        console.log(nuevoJugador.id);
-        console.log(this.socket.id);
         if (nuevoJugador.id == this.socket.id) {
           this.player = nuevoJugador;
           this.player.personaje = cont;
