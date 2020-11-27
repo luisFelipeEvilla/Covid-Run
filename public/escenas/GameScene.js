@@ -105,8 +105,9 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.overlap(
       this.players,
       this.obstaculos,
-      (jugador, estrella) => {
-        if (jugador.id == this.socket.id) {
+      (jugador, obstaculo) => {
+        if (jugador.id == this.socket.id && jugador.vivo) {
+            console.log("contagio");
           this.socket.emit("contagio");
         }
       },
@@ -143,6 +144,8 @@ export default class GameScene extends Phaser.Scene {
         nuevoJugador.setCollideWorldBounds(true);
         nuevoJugador.vivo = true;
 
+        console.log(nuevoJugador.id);
+        console.log(this.socket.id);
         if (nuevoJugador.id == this.socket.id) {
           this.player = nuevoJugador;
           this.player.personaje = cont;
@@ -167,6 +170,7 @@ export default class GameScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 1500,
       callback: () => {
+        player.setActive(false);
         player.setVisible(false);
       },
       loop: false,
