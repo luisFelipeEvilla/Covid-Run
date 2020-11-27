@@ -49,6 +49,7 @@ io.on("connection", (socket) => {
     
     jugadores.forEach(jugador => {
       if (jugador.id == socket.id) {
+        console.log(socket.id);
         jugador.listo = true;
       }
     })
