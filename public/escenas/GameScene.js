@@ -21,7 +21,6 @@ export default class GameScene extends Phaser.Scene {
     this.acumulador = 0;
     this.socket = socket;
     this.velocidadObstaculos = -100;
-    this.contadorDelay = 0;
   }
 
   preload() {
@@ -126,7 +125,6 @@ export default class GameScene extends Phaser.Scene {
   // crear los personajes a medida que se van conectando
   crearPersonaje(data) {
     var jugadores = data.jugadores;
-    var cont = 1;
 
     jugadores.forEach((jugador) => {
       var found = false;
@@ -137,7 +135,7 @@ export default class GameScene extends Phaser.Scene {
         }
       });
 
-      if (!found && cont <= 2) {
+      if (!found) {
         var nuevoJugador = this.physics.add
           .sprite(100, 270, `personaje${cont}`)
           .setScale(1.5, 1.5);
@@ -335,20 +333,6 @@ export default class GameScene extends Phaser.Scene {
         });
       }
     });
-
-    this.socket.on("compensacion", data => {
-      var id = data.id;
-      var posicion = data.posicion;
-
-      if (id != this.socket.id) {
-        this.players.children.iterate( j => {
-          if (j.id == id) {
-            j.body.x = posicion.x;
-            j.body.y = posicion.y;
-          }
-        })
-      }
-    })
   }
 
   update(time, dt) {
@@ -398,14 +382,6 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     }
-
-    if ( this.contadorDelay > 2000) {
-      this.contadorDelay = 0;
-      this.socket.emit('compensacion', {
-        x: this.player.x,
-        y: this.player.y
-      })
-    } 
 
     // crear obstaculos
     this.obstaculos.children.iterate((obstaculo) => {
