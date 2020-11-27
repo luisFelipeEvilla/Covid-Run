@@ -21,11 +21,11 @@ export default class MenuScene extends Phaser.Scene {
 
         // añadiendo boton de inicio
         this.boton = this.add.image(centroX,
-            centroY, 'iniciar');
+            centroY + 40, 'iniciar');
 
         this.boton.setInteractive().on('pointerdown', () => {
             this.game.scene.start('game', this.socket);
-            this.game.scene.pause('menu')
+            this.game.scene.stop('menu');
         });
 
         this.boton.on('pointerover', () => {
@@ -44,9 +44,23 @@ export default class MenuScene extends Phaser.Scene {
             { font: "bold 30px sans-serif", fill: "balck", align: "center" });
         this.txtTitulo.setOrigin(0.5, 0.5);
 
+        // numero de jugadores en espera
+        this.numJugadores = 0;
+        //añadiendo call action
+        this.txtNumJugadores = this.add.text(centroX,
+            centroY - 85, `Jugadores conectados: ${this.numJugadores}`,
+            { font: "bold 24px sans-serif", fill: "balck", align: "center"});
+        this.txtNumJugadores.setOrigin(0.5, 0.5);
+        
+        this.socket.emit("nuevoJugador", this.socket.id);
+        this.socket.on('actualizarJugadores', (data) => {
+            this.numJugadores = data.jugadores.length;
+            this.txtNumJugadores.setText(`Jugadores conectados: ${this.numJugadores}`);
+        })
+
         //añadiendo call action
         this.txtIniciar = this.add.text(centroX,
-            centroY - 85, "Iniciar Juego",
+            centroY - 45, "Iniciar Juego",
             { font: "bold 24px sans-serif", fill: "balck", align: "center"});
         this.txtIniciar.setOrigin(0.5, 0.5);
     }

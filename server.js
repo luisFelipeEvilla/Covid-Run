@@ -33,9 +33,13 @@ io.on("connection", (socket) => {
       `Se ha conectado un nuevo usuario con ID: ${chalk.green(socket.id)}`
     );
     console.log(`número de jugadores actual: ${jugadores.length}`);
-    io.emit("actualizarJugadores", jugadores);
+    io.emit("actualizarJugadores", {jugadores, id: socket.id});
   });
 
+  socket.on("crearJugadores", () => {
+      io.emit("actualizarJugadores", {jugadores, id: socket.id});
+  })
+  
   socket.on("contagio", () => {
     io.emit("contagio", socket.id);
   });
@@ -61,6 +65,7 @@ io.on("connection", (socket) => {
     console.log(
       `Se ha desconectado un usuario con ID: ${chalk.red(socket.id)}`
     );
+    io.emit("actualizarJugadores", {jugadores, id: socket.id})
   });
 });
 

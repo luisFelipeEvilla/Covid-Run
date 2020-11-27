@@ -55,19 +55,20 @@ export default class GameScene extends Phaser.Scene {
 
     //añadir personaje
     this.players = this.physics.add.group();
-
-    this.socket.emit("nuevoJugador", this.socket.id);
+    this.animarPersonaje();
+    this.moverPersonaje();
+    this.socket.emit("crearJugadores");
 
     this.socket.on("actualizarJugadores", (data) => {
       this.crearPersonaje(data);
     });
 
     this.socket.on("contagio", (id) => {
-        this.players.children.iterate(jugador => {
-            if (jugador.id == id) {
-                this.contagio(jugador);
-            }
-        })
+      this.players.children.iterate((jugador) => {
+        if (jugador.id == id) {
+          this.contagio(jugador);
+        }
+      });
     });
 
     // contador de score
@@ -106,7 +107,7 @@ export default class GameScene extends Phaser.Scene {
       this.obstaculos,
       (jugador, estrella) => {
         if (jugador.id == this.socket.id) {
-            this.socket.emit("contagio");
+          this.socket.emit("contagio");
         }
       },
       null,
@@ -118,85 +119,77 @@ export default class GameScene extends Phaser.Scene {
 
   // crear los personajes a medida que se van conectando
   crearPersonaje(data) {
-    var jugadores = data;
+    var jugadores = data.jugadores;
     var cont = 1;
 
     jugadores.forEach((jugador) => {
-      if (jugador != this.socket.id) {
+      var found = false;
+
+      this.players.children.iterate((j) => {
+        if (j.id == jugador) {
+          found = true;
+        }
+      });
+
+      if (!found) {
         var nuevoJugador = this.physics.add
           .sprite(100, 270, `personaje${cont}`)
           .setScale(1.5, 1.5)
           .refreshBody();
         nuevoJugador.setBounce("0.2");
-        nuevoJugador.id = jugador;
-        
+
         this.players.add(nuevoJugador);
+        nuevoJugador.id = jugador;
         nuevoJugador.setCollideWorldBounds(true);
         nuevoJugador.vivo = true;
-        cont ++;
-    } else {
-        if (!this.personajeCreado) {
-          this.player = this.physics.add
-            .sprite(100, 270, `personaje${cont}`)
-            .setScale(1.5, 1.5)
-            .refreshBody();
-          this.player.setBounce("0.2");
-          this.player.id = this.socket.id;
-          this.animarPersonaje();
-          this.moverPersonaje();
-          this.players.add(this.player);
 
-          this.player.setCollideWorldBounds(true);
-
-          this.personajeCreado = true;
-          this.player.personaje = jugador.personaje 
-          this.player.vivo = true;
-          cont++;
+        if (nuevoJugador.id == this.socket.id) {
+          this.player = nuevoJugador;
+          this.player.personaje = cont;
         }
+
+        cont++;
       }
     });
   }
 
   // se ejecuta cuando un jugador choca contra algun elemento infectado
   contagio(player) {
-    if ( player.id == this.socket.id) {
-        this.gameOver = true;
+    if (player.id == this.socket.id) {
+      this.gameOver = true;
     }
     player.setTint(0xff0000);
     //player.anims.play("turn");
     //player.setVelocityY(-300);
     player.setVelocityX(0);
     player.vivo = false;
-    
-    
+
     this.time.addEvent({
-        delay: 1500,
-        callback: () => {
-            player.setVisible(false);
-        },
-        loop: false,
-      });
+      delay: 1500,
+      callback: () => {
+        player.setVisible(false);
+      },
+      loop: false,
+    });
 
     var aux = true;
 
-    this.players.children.iterate(jugador => {
-        if (jugador.vivo == true) {
-            aux = false;
-        }
-    })    
+    this.players.children.iterate((jugador) => {
+      if (jugador.vivo == true) {
+        aux = false;
+      }
+    });
 
     if (aux) {
-        this.time.addEvent({
-            delay: 1500,
-            callback: () => {
-              this.scene.stop();
-              this.game.scene.start("gameOver", this.score);
-            },
-            loop: false,
-          });
+      this.time.addEvent({
+        delay: 1500,
+        callback: () => {
+          this.scene.stop();
+          this.game.scene.start("gameOver", this.score);
+        },
+        loop: false,
+      });
     }
-
-    
   }
 
   // crea los obstaculos infectados
@@ -267,51 +260,57 @@ export default class GameScene extends Phaser.Scene {
   // recibe los eventos de movimiento de los personajes
   moverPersonaje() {
     this.socket.on("izquierda", (id) => {
+      if (id != this.socket.id) {
         var cont = 1;
-        this.players.children.iterate(jugador => {
-            if (jugador.id === id) {
-                jugador.setVelocityX(-160);
-                jugador.anims.play(`left${cont}`)
-            }
-            cont++;
-        })
+
+        this.players.children.iterate((jugador) => {
+          if (jugador.id === id) {
+            jugador.setVelocityX(-160);
+            jugador.anims.play(`left${cont}`);
+          }
+          cont++;
+        });
+      }
     });
 
     this.socket.on("derecha", (id) => {
+      if (id != this.socket.id) {
         var cont = 1;
 
         this.players.children.iterate((j) => {
           if (j.id === id) {
             j.setVelocityX(160);
             j.anims.play(`right${cont}`);
-           } else {
-               cont++;
-           }
+          } else {
+            cont++;
+          }
         });
-      
+      }
     });
 
     this.socket.on("quieto", (id) => {
+      if (id != this.socket.id) {
         var cont = 1;
-       
+
         this.players.children.iterate((j) => {
           if (j.id === id) {
             j.setVelocityX(0);
             j.anims.play(`turn${cont}`);
           } else {
-              cont++
+            cont++;
           }
         });
-      
+      }
     });
 
     this.socket.on("arriba", (id) => {
+      if (id != this.socket.id) {
         this.players.children.iterate((j) => {
           if (j.id === id && j.body.touching.down) {
             j.setVelocityY(-250);
-          } 
+          }
         });
-      
+      }
     });
   }
 
@@ -341,13 +340,27 @@ export default class GameScene extends Phaser.Scene {
     if (!this.gameOver) {
       if (this.cursors.left.isDown) {
         this.socket.emit("izquierda", this.socket.id);
+
+        this.player.setVelocityX(-160);
+        this.player.anims.play(`left${this.player.personaje}`);
       } else if (this.cursors.right.isDown) {
         this.socket.emit("derecha", this.socket.id);
+
+        this.player.setVelocityX(160);
+        this.player.anims.play(`right${this.player.personaje}`);
       } else {
-        this.socket.emit("quieto", this.socket.id);
-      } 
-      if (this.cursors.up.isDown) {
+        if (this.player != null) {
+          this.socket.emit("quieto", this.socket.id);
+
+          this.player.setVelocityX(0);
+          this.player.anims.play(`turn${this.player.personaje}`);
+        }
+      }
+      if (this.cursors.up.isDown && this.player.body.touching.down) {
         this.socket.emit("arriba", this.socket.id);
+
+        this.player.setVelocityY(-250);
+        this.player.anims.play(`turn${this.player.personaje}`);
       }
     }
   }
