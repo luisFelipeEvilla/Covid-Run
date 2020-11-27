@@ -188,6 +188,7 @@ export default class GameScene extends Phaser.Scene {
         delay: 1500,
         callback: () => {
           this.scene.stop();
+
           this.scene.start("gameOver", {
             score: this.score,
             socket: this.socket,
@@ -336,6 +337,36 @@ export default class GameScene extends Phaser.Scene {
       this.acumulador -= 1000;
     }
 
+    if (this.acumulador > 150) {
+      if (!this.gameOver) {
+        if (this.cursors.left.isDown) {
+          this.socket.emit("izquierda", this.socket.id);
+  
+          this.player.setVelocityX(-160);
+          this.player.anims.play(`left${this.player.personaje}`);
+        } else {
+          if (this.cursors.right.isDown) {
+            this.socket.emit("derecha", this.socket.id);
+  
+            this.player.setVelocityX(160);
+            this.player.anims.play(`right${this.player.personaje}`);
+          } else {
+            if (this.player != null) {
+              this.socket.emit("quieto", this.socket.id);
+              this.player.setVelocityX(0);
+              this.player.anims.play(`right${this.player.personaje}`);
+            }
+          }
+        }
+        if (this.cursors.up.isDown && this.player.body.touching.down) {
+          this.socket.emit("arriba", this.socket.id);
+  
+          this.player.setVelocityY(-250);
+          this.player.anims.play(`turn${this.player.personaje}`);
+        }
+      }
+    }
+
     // crear obstaculos
     this.obstaculos.children.iterate((obstaculo) => {
       if (obstaculo.body.x < 0 - obstaculo.body.width) {
@@ -344,31 +375,6 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
-    if (!this.gameOver) {
-      if (this.cursors.left.isDown) {
-        this.socket.emit("izquierda", this.socket.id);
-
-        this.player.setVelocityX(-160);
-        this.player.anims.play(`left${this.player.personaje}`);
-      } else if (this.cursors.right.isDown) {
-        this.socket.emit("derecha", this.socket.id);
-
-        this.player.setVelocityX(160);
-        this.player.anims.play(`right${this.player.personaje}`);
-      } else {
-        if (this.player != null) {
-          this.socket.emit("quieto", this.socket.id);
-
-          this.player.setVelocityX(0);
-          this.player.anims.play(`turn${this.player.personaje}`);
-        }
-      }
-      if (this.cursors.up.isDown && this.player.body.touching.down) {
-        this.socket.emit("arriba", this.socket.id);
-
-        this.player.setVelocityY(-250);
-        this.player.anims.play(`turn${this.player.personaje}`);
-      }
-    }
+    
   }
 }
