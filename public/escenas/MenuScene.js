@@ -39,7 +39,7 @@ export default class MenuScene extends Phaser.Scene {
             jugadores.forEach(jugador => {
                 if (jugador.listo == false) {
                     listos = false;
-                    console.log("uno no esta preparado");
+                    console.log(jugadores);
                 }
             });
 
